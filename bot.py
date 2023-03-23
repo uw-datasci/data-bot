@@ -4,6 +4,11 @@ import os
 import re
 from discord.ext import commands
 from dotenv import load_dotenv
+import asyncio
+import datetime
+# from datetime import datetime
+import pytz
+# from pytz import timezone
 
 intents = discord.Intents.default()
 intents.members = True
@@ -47,12 +52,14 @@ async def on_member_join(member):
 async def assign_roles(message):
     print("Assigning roles...")
 
-    languages = set(re.findall("python|javascript|rust|go|c\+\+", message.content, re.IGNORECASE))
+    languages = set(re.findall("python|javascript|rust|go|c\+\+",
+                    message.content, re.IGNORECASE))
 
     if languages:
         server = bot.get_guild(SERVER_ID)
 
-        roles = [discord.utils.get(server.roles, name=language.lower()) for language in languages]
+        roles = [discord.utils.get(server.roles, name=language.lower())
+                 for language in languages]
 
         member = await server.fetch_member(message.author.id)
 
@@ -69,12 +76,67 @@ async def on_message(message):
         return
 
     if message.content.startswith("!roles"):
+        print("HEREERE")
         await dm_about_roles(message.author)
     elif message.content.startswith("!serverid"):
         await message.channel.send(message.channel.guild.id)
+    elif message.content.startswith("!setExecMeetingDates"):
+        print("sanity check: i feel like im designing test file for cs ;(")
+        # await message.channel.send("sanity check: i feel like im designing test file for cs ;(")
+        # await set_exec_meeting_dates(message)
+
+@bot.command()
+async def set_exec_meeting_dates(ctx, arg): 
+    await ctx.send("PPLZ JUST WORK")
+    print("sanity check: i feel like im designing test file for cs ;(")
+    # print(msg)
+
+
+@bot.event
+async def on_ready():
+    await exec_reminder_message()
+
+async def exec_reminder_message():
+    while True:
+        channel = bot.get_channel(1028780190941335635)
+        est_timezone = pytz.timezone("Canada/Eastern") 
+        current_time = datetime.datetime.now(est_timezone)
+        exec_meeting_time = datetime.datetime(year = current_time.year, 
+                                              month = current_time.month, 
+                                              day = current_time.day, 
+                                              hour = 23, minute = 0,
+                                              second = current_time.second,
+                                              tzinfo=est_timezone)
+        
+        time_diff = exec_meeting_time - current_time
+        time_diff = round(time_diff.total_seconds() / 60)
+        if time_diff == 33:
+            await channel.send("@meeting bot tester 15 minutes reminder")
+            await asyncio.sleep(60)
+        elif time_diff == 20:
+            await channel.send("@exec meeting starts rn")
+            await asyncio.sleep(60)
+
+
+
+
+
+
+
 
 
 bot.run(TOKEN)
+
+
+
+
+
+
+
+
+
+
+
 
 # bot asks user in channel instead of dm
 # @client.event
